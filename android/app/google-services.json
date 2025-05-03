@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "527309320532",
+    "project_id": "fir-sisapp-94d35",
+    "storage_bucket": "fir-sisapp-94d35.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:527309320532:android:08b2160c76e74e4acad8c1",
+        "android_client_info": {
+          "package_name": "com.example.sisapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCP3x_yjbZW3JFsa4xmNapOwk7a8Jy7APY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
