@@ -1,0 +1,2 @@
+E:/Ethan/School/MOBA/StudentIS/draft/sisapp/android/app/.cxx/Debug/5j3g4i4b/x86_64/CMakeFiles/edit_cache.dir
+E:/Ethan/School/MOBA/StudentIS/draft/sisapp/android/app/.cxx/Debug/5j3g4i4b/x86_64/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,2 @@
+C:/app/sisapp/android/app/.cxx/Debug/6r2v735w/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/app/sisapp/android/app/.cxx/Debug/6r2v735w/armeabi-v7a/CMakeFiles/rebuild_cache.dir
