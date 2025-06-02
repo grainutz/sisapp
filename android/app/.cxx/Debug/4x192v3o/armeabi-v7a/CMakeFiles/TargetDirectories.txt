@@ -1,0 +1,2 @@
+E:/Ethan/sisapp/sisapp/android/app/.cxx/Debug/4x192v3o/armeabi-v7a/CMakeFiles/edit_cache.dir
+E:/Ethan/sisapp/sisapp/android/app/.cxx/Debug/4x192v3o/armeabi-v7a/CMakeFiles/rebuild_cache.dir

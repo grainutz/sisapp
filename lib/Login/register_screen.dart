@@ -1,4 +1,4 @@
-// register_screen.dart
+// register_screen.dart - MODIFIED VERSION
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,6 +28,7 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
     });
 
     try {
+      // Create user in Firebase Auth but disable the account
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
@@ -36,19 +37,33 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
       final uid = userCredential.user?.uid;
 
       if (uid != null) {
+        // Store user data with pending status
         await _firestore.collection('users').doc(uid).set({
           'uid': uid,
           'email': _emailController.text.trim(),
           'name': _nameController.text.trim(),
           'studentId': _studentIdController.text.trim(),
           'role': 'student',
+          'status': 'pending', // pending, approved, rejected
           'createdAt': FieldValue.serverTimestamp(),
         });
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginStudentScreen()),
-        );
+        // Create a registration request for admin review
+        await _firestore.collection('registration_requests').doc(uid).set({
+          'uid': uid,
+          'email': _emailController.text.trim(),
+          'name': _nameController.text.trim(),
+          'studentId': _studentIdController.text.trim(),
+          'role': 'student',
+          'status': 'pending',
+          'requestedAt': FieldValue.serverTimestamp(),
+        });
+
+        // Sign out the user immediately after registration
+        await _auth.signOut();
+
+        // Show success message
+        _showSuccessDialog();
       }
     } on FirebaseAuthException catch (e) {
       String message = 'Registration failed';
@@ -64,6 +79,34 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Registration Submitted'),
+          content: const Text(
+            'Your registration request has been submitted successfully. '
+            'Please wait for admin approval before you can login to your account.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginStudentScreen()),
+                );
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -125,7 +168,7 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Register', style: TextStyle(fontSize: 18)),
+                      : const Text('Submit Registration', style: TextStyle(fontSize: 18)),
                 ),
               ),
               const SizedBox(height: 20),

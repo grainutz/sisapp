@@ -11,6 +11,46 @@ class CoursesTab extends StatefulWidget {
 class _CoursesTabState extends State<CoursesTab> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> enrolledCourses = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEnrolledCourses();
+  }
+
+  Future<void> fetchEnrolledCourses() async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) return;
+
+    final allCourses = await _firestore.collection('courses').get();
+    List<Map<String, dynamic>> tempCourses = [];
+
+    for (var courseDoc in allCourses.docs) {
+      final studentDoc = await _firestore
+          .collection('courses')
+          .doc(courseDoc.id)
+          .collection('students')
+          .doc(userId)
+          .get();
+
+      if (studentDoc.exists) {
+        Map<String, dynamic> courseData = courseDoc.data();
+
+        tempCourses.add({
+          'courseId': courseDoc.id,
+          'courseName': courseData['courseName'] ?? 'Unnamed Course',
+          'teacherName': courseData['assignedTeacher']?['name'] ?? 'Unknown Teacher',
+        });
+      }
+    }
+
+    setState(() {
+      enrolledCourses = tempCourses;
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,61 +62,33 @@ class _CoursesTabState extends State<CoursesTab> {
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              // Implement search functionality
+              // Implement search
             },
           ),
         ],
       ),
-      
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('courses')
-            .where('studentIds', arrayContains: _auth.currentUser?.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No courses found'));
-          }
-          
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) {
-              DocumentSnapshot doc = snapshot.data!.docs[index];
-              Map<String, dynamic> course = doc.data() as Map<String, dynamic>;
-              
-              return CourseCard(
-                courseId: doc.id,
-                courseName: course['name'],
-                teacherName: course['teacherName'],
-                bannerColor: _getColorFromHex(course['bannerColor'] ?? '#1565C0'),
-                bannerUrl: course['bannerUrl'],
-              );
-            },
-          );
-        },
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : enrolledCourses.isEmpty
+              ? Center(child: Text('No enrolled courses found'))
+              : ListView.builder(
+                  itemCount: enrolledCourses.length,
+                  itemBuilder: (context, index) {
+                    final course = enrolledCourses[index];
+                    return CourseCard(
+                      courseId: course['courseId'],
+                      courseName: course['courseName'],
+                      teacherName: course['teacherName'],
+                    );
+                  },
+                ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
-          // Join a new course
+          // Join course
         },
       ),
     );
   }
-  
-  Color _getColorFromHex(String hexColor) {
-    hexColor = hexColor.replaceAll('#', '');
-    if (hexColor.length == 6) {
-      hexColor = 'FF' + hexColor;
-    }
-    return Color(int.parse(hexColor, radix: 16));
-  }
+
 }

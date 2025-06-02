@@ -1,7 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class TeacherHomeScreen extends StatelessWidget {
+class TeacherHomeScreen extends StatefulWidget {
+  @override
+  _TeacherHomeScreenState createState() => _TeacherHomeScreenState();
+}
+
+class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
   final user = FirebaseAuth.instance.currentUser;
 
   @override
@@ -10,6 +15,10 @@ class TeacherHomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Teacher Dashboard'),
         actions: [
+          IconButton(
+            icon: Icon(Icons.person),
+            onPressed: () => Navigator.pushNamed(context, '/teacher-profile'),
+          ),
           IconButton(
             icon: Icon(Icons.logout),
             onPressed: () async {
@@ -42,7 +51,12 @@ class TeacherHomeScreen extends StatelessWidget {
                   _buildMenuCard(
                     icon: Icons.book,
                     label: 'My Courses',
-                    onTap: () => Navigator.pushNamed(context, '/courses'),
+                    onTap: () => Navigator.pushNamed(context, '/teacher-courses'),
+                  ),
+                  _buildMenuCard(
+                    icon: Icons.assignment,
+                    label: 'Assignments',
+                    onTap: () => Navigator.pushNamed(context, '/teacher-assignments'),
                   ),
                   _buildMenuCard(
                     icon: Icons.campaign,
@@ -50,17 +64,41 @@ class TeacherHomeScreen extends StatelessWidget {
                     onTap: () => Navigator.pushNamed(context, '/announcements'),
                   ),
                   _buildMenuCard(
-                    icon: Icons.assignment,
-                    label: 'Assignments',
-                    onTap: () => Navigator.pushNamed(context, '/assignments'),
-                  ),
-                  _buildMenuCard(
                     icon: Icons.folder_shared,
                     label: 'Submissions',
                     onTap: () => Navigator.pushNamed(context, '/submissions'),
                   ),
+                  _buildMenuCard(
+                    icon: Icons.grade,
+                    label: 'Grading',
+                    onTap: () => Navigator.pushNamed(context, '/grading'),
+                  ),
                 ],
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Icon(icon, size: 24, color: color),
+            SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color),
+            ),
+            Text(
+              title,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

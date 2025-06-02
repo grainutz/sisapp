@@ -1,7 +1,8 @@
+// register_teacher_screen.dart - MODIFIED VERSION
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:sisapp/teacher/screens/teacher_home_screen.dart';
+import 'teacher_login_screen.dart';
 
 class RegisterTeacherScreen extends StatefulWidget {
   const RegisterTeacherScreen({super.key});
@@ -14,6 +15,8 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _employeeIdController = TextEditingController();
+  final TextEditingController _departmentController = TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -26,6 +29,7 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
     });
 
     try {
+      // Create user in Firebase Auth
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
@@ -34,18 +38,35 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
       final uid = userCredential.user?.uid;
 
       if (uid != null) {
+        // Store user data with pending status
         await _firestore.collection('users').doc(uid).set({
           'uid': uid,
           'email': _emailController.text.trim(),
           'name': _nameController.text.trim(),
+          'employeeId': _employeeIdController.text.trim(),
+          'department': _departmentController.text.trim(),
           'role': 'teacher',
+          'status': 'pending', // pending, approved, rejected
           'createdAt': FieldValue.serverTimestamp(),
         });
 
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => TeacherHomeScreen()),
-        );
+        // Create a registration request for admin review
+        await _firestore.collection('registration_requests').doc(uid).set({
+          'uid': uid,
+          'email': _emailController.text.trim(),
+          'name': _nameController.text.trim(),
+          'employeeId': _employeeIdController.text.trim(),
+          'department': _departmentController.text.trim(),
+          'role': 'teacher',
+          'status': 'pending',
+          'requestedAt': FieldValue.serverTimestamp(),
+        });
+
+        // Sign out the user immediately after registration
+        await _auth.signOut();
+
+        // Show success message
+        _showSuccessDialog();
       }
     } on FirebaseAuthException catch (e) {
       String message = 'Registration failed';
@@ -61,6 +82,34 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Registration Submitted'),
+          content: const Text(
+            'Your registration request has been submitted successfully. '
+            'Please wait for admin approval before you can login to your account.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginTeacherScreen()),
+                );
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -81,6 +130,22 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'Full Name',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _employeeIdController,
+                decoration: InputDecoration(
+                  labelText: 'Employee ID',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _departmentController,
+                decoration: InputDecoration(
+                  labelText: 'Department',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
@@ -114,7 +179,7 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
                   ),
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Register', style: TextStyle(fontSize: 18)),
+                      : const Text('Submit Registration', style: TextStyle(fontSize: 18)),
                 ),
               ),
               const SizedBox(height: 20),

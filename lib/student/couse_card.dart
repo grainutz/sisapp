@@ -5,15 +5,11 @@ class CourseCard extends StatelessWidget {
   final String courseId;
   final String courseName;
   final String teacherName;
-  final Color bannerColor;
-  final String? bannerUrl;
 
   const CourseCard({
     required this.courseId,
     required this.courseName,
     required this.teacherName,
-    required this.bannerColor,
-    this.bannerUrl,
   });
 
   @override
@@ -36,15 +32,6 @@ class CourseCard extends StatelessWidget {
           children: [
             Container(
               height: 100,
-              decoration: BoxDecoration(
-                color: bannerUrl == null ? bannerColor : null,
-                image: bannerUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(bannerUrl!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
-              ),
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: Padding(
@@ -52,7 +39,7 @@ class CourseCard extends StatelessWidget {
                   child: Text(
                     courseName,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: const Color.fromARGB(255, 0, 0, 0),
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
                     ),

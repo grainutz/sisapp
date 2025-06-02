@@ -124,7 +124,7 @@ class _LoginStudentScreenState extends State<LoginStudentScreen> {
                   const Text("Don't have an account? "),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/register-student');
+                      Navigator.pushNamed(context, '/register');
                     },
                     child: const Text(
                       "Register",

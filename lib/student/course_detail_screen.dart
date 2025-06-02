@@ -27,7 +27,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
           .collection('courses')
           .doc(widget.courseId)
           .get();
-      
+
       if (doc.exists) {
         setState(() {
           courseData = doc.data() as Map<String, dynamic>;
@@ -62,7 +62,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(courseData!['name']),
+        title: Text(courseData!['courseName']),
         backgroundColor: bannerColor,
       ),
       body: DefaultTabController(
@@ -115,17 +115,17 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
-        
+
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Center(child: Text('No announcements yet'));
         }
-        
+
         return ListView.builder(
           itemCount: snapshot.data!.docs.length,
           itemBuilder: (context, index) {
             DocumentSnapshot doc = snapshot.data!.docs[index];
             Map<String, dynamic> announcement = doc.data() as Map<String, dynamic>;
-            
+
             return Card(
               margin: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: Padding(
@@ -178,17 +178,17 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
-        
+
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Center(child: Text('No assignments yet'));
         }
-        
+
         return ListView.builder(
           itemCount: snapshot.data!.docs.length,
           itemBuilder: (context, index) {
             DocumentSnapshot doc = snapshot.data!.docs[index];
             Map<String, dynamic> assignment = doc.data() as Map<String, dynamic>;
-            
+
             return Card(
               margin: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: ListTile(
@@ -211,6 +211,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Teachers
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
@@ -220,11 +221,14 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         ),
         ListTile(
           leading: CircleAvatar(
-            child: Text(courseData!['teacherName'][0]),
+            child: Text(courseData!['assignedTeacher']['name'][0]),
           ),
-          title: Text(courseData!['teacherName']),
+          title: Text(courseData!['assignedTeacher']['name']),
+          subtitle: Text(courseData!['assignedTeacher']['email']),
         ),
         Divider(),
+
+        // Students
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
@@ -233,28 +237,33 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
           ),
         ),
         Expanded(
-          child: FutureBuilder<QuerySnapshot>(
-            future: _firestore.collection('users').where('id', whereIn: courseData!['studentIds']).get(),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: _firestore
+                .collection('courses')
+                .doc(widget.courseId)
+                .collection('students')
+                .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
               }
-              
+
               if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                 return Center(child: Text('No students enrolled'));
               }
-              
+
               return ListView.builder(
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (context, index) {
                   DocumentSnapshot doc = snapshot.data!.docs[index];
                   Map<String, dynamic> student = doc.data() as Map<String, dynamic>;
-                  
+
                   return ListTile(
                     leading: CircleAvatar(
-                      child: Text(student['name'][0]),
+                      child: Text(student['studentName'][0]),
                     ),
-                    title: Text(student['name']),
+                    title: Text(student['studentName']),
+                    subtitle: Text(student['studentEmail']),
                   );
                 },
               );

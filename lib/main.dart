@@ -14,6 +14,18 @@ import 'package:sisapp/teacher/screens/teacher_home_screen.dart';
 import 'Login/teacher_register_screen.dart';
 import 'Login/teacher_login_screen.dart';
 import 'role_selection_screen.dart';
+import '../teacher/screens/teacher_courses_screen.dart';
+import '/teacher/screens/teacher_assignment_screen.dart';
+import '/teacher/screens/teacher_announcement_screen.dart';
+import '/teacher/screens/teacher_submissions_screen.dart';
+import '/teacher/screens/grading_screen.dart';
+import 'teacher/screens/courses_students_screen.dart';
+import 'teacher/screens/course_assignments_screen.dart';
+import 'Login/admin_login_screen.dart';
+import 'admin/admin_dashboard.dart';
+import 'admin/admin_course_management_screen.dart';
+import 'admin/admin_registration_screen.dart';
+
 
 void main() async {
 
@@ -109,7 +121,7 @@ class StudentInfoApp extends StatelessWidget {
         //'/': (context) => RoleSelectionScreen(),
         '/login-student': (context) => LoginStudentScreen(),
         '/login-teacher': (context) => LoginTeacherScreen(),
-        //'/login-admin': (context) => LoginAdminScreen(),
+        '/login-admin': (context) => AdminLoginScreen(),
         '/register': (context) => RegisterStudentScreen(),
         '/register-teacher': (context) => const RegisterTeacherScreen(), 
         '/students': (context) => StudentListScreen(),
@@ -117,7 +129,46 @@ class StudentInfoApp extends StatelessWidget {
         '/details': (context) => StudentDetailScreen(),
         '/settings': (context) => SettingsScreen(),
         '/teacherHome': (context) => TeacherHomeScreen(),
+        '/teacher-courses': (context) => TeacherCoursesScreen(),
+        '/teacher-assignments': (context) => TeacherAssignmentsScreen(),
+        '/announcements': (context) => AnnouncementsScreen(),
+        '/submissions': (context) => SubmissionsScreen(),
+        '/grading': (context) => GradingScreen(),
+        '/admin-dashboard': (context) => AdminHomeScreen(),
+        '/admin-courses': (context) => AdminCourseManagementScreen(),
+        '/admin-registrations': (context) => AdminRegistrationScreen(),
       },
+      onGenerateRoute: (settings) {
+    if (settings.name == '/course-students') {
+      final args = settings.arguments as Map<String, dynamic>;
+
+      return MaterialPageRoute(
+        builder: (context) => CourseStudentsScreen(
+          courseId: args['courseId'],
+          courseName: args['courseName'],
+        ),
+      );
+    }
+
+    if (settings.name == '/course-assignments') {
+      final args = settings.arguments as Map<String, dynamic>;
+
+      return MaterialPageRoute(
+        builder: (context) => CourseAssignmentsScreen(
+          courseId: args['courseId'],
+          courseName: args['courseName'],
+        ),
+      );
+    }
+
+    // Optional fallback for unknown routes
+    return MaterialPageRoute(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: const Text('Page Not Found')),
+        body: const Center(child: Text('404 - Page Not Found')),
+      ),
+    );
+  },
     );
   }
 }
